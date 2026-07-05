@@ -1,12 +1,18 @@
-# Python
-venv/
+# Virtual Environment
+backend/venv/
+
+# Python Cache
 __pycache__/
-*.pyc
+*.py[cod]
+
+# SQLite Database
 *.db
 
-# Node
-node_modules/
-dist/
-
-# Editor
+# VS Code
 .vscode/
+
+# Environment Variables
+.env
+
+# macOS
+.DS_Store
