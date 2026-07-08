@@ -13,13 +13,17 @@ from database import engine, get_db
 
 models.Base.metadata.create_all(bind=engine)
 
-app = FastAPI()
+app = FastAPI(
+    title="Task Manager API",
+    description="REST API for managing personal tasks and goals.",
+    version="1.0.0"
+)
 
-@app.get("/")
+@app.get("/", tags=["Home"])
 def home():
     return {"message": "Welcome to Task Manager API"}
 
-@app.post("/tasks", response_model=schemas.TaskResponse)
+@app.post("/tasks", tags=["Tasks"])
 def create_task(task: schemas.TaskCreate, db: Session = Depends(get_db)):
 
     new_task = models.Task(
@@ -27,22 +31,35 @@ def create_task(task: schemas.TaskCreate, db: Session = Depends(get_db)):
         description=task.description,
         completed=task.completed
     )
-        
+
     db.add(new_task)
     db.commit()
     db.refresh(new_task)
 
     return new_task
 
+@app.get("/health", tags=["Health"])
+def health_check():
+    return {
+        "status": "healthy",
+        "service": "Task Manager API"
+    }
+
+# ==========================
 # GET ALL TASKS
-@app.get("/tasks", response_model=List[schemas.TaskResponse])
+# ==========================
+
+@app.get("/tasks", tags=["Tasks"])
 def get_tasks(db: Session = Depends(get_db)):
     tasks = db.query(models.Task).all()
     return tasks
 
 
+# ==========================
 # GET TASK BY ID
-@app.get("/tasks/{task_id}", response_model=schemas.TaskResponse)
+# ==========================
+
+@app.get("/tasks/{task_id}", tags=["Tasks"])
 def get_task(task_id: int, db: Session = Depends(get_db)):
     task = db.query(models.Task).filter(models.Task.id == task_id).first()
 
@@ -52,8 +69,11 @@ def get_task(task_id: int, db: Session = Depends(get_db)):
     return task
 
 
+# ==========================
 # UPDATE TASK
-@app.put("/tasks/{task_id}", response_model=schemas.TaskResponse)
+# ==========================
+
+@app.put("/tasks/{task_id}", tags=["Tasks"])
 def update_task(task_id: int, updated_task: schemas.TaskCreate, db: Session = Depends(get_db)):
     task = db.query(models.Task).filter(models.Task.id == task_id).first()
 
@@ -70,8 +90,11 @@ def update_task(task_id: int, updated_task: schemas.TaskCreate, db: Session = De
     return task
 
 
+# ==========================
 # DELETE TASK
-@app.delete("/tasks/{task_id}")
+# ==========================
+
+@app.delete("/tasks/{task_id}", tags=["Tasks"])
 def delete_task(task_id: int, db: Session = Depends(get_db)):
     task = db.query(models.Task).filter(models.Task.id == task_id).first()
 
